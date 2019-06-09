@@ -7,6 +7,7 @@ package pdqsort
 import (
 	"math"
 	"math/rand"
+	stdsort "sort"
 	"testing"
 	"github.com/stretchr/testify/assert"
 )
@@ -175,5 +176,31 @@ func TestSortLarge_Random(t *testing.T) {
 	Ints(data)
 	if !IntsAreSorted(data) {
 		t.Errorf("sort didn't sort - 1M ints")
+	}
+}
+
+func BenchmarkPDQSortInt1K(b *testing.B) {
+  	b.StopTimer()
+  	for i := 0; i < b.N; i++ {
+    	data := make([]int, 1<<10)
+    	for i := 0; i < len(data); i++ {
+      		data[i] = i ^ 0x2cc
+    	}
+    	b.StartTimer()
+    	Ints(data)
+    	b.StopTimer()
+  	}
+}
+
+func BenchmarkStdSortInt1K(b *testing.B) {
+	b.StopTimer()
+	for i := 0; i < b.N; i++ {
+	  data := make([]int, 1<<10)
+	  for i := 0; i < len(data); i++ {
+			data[i] = i ^ 0x2cc
+	  }
+	  b.StartTimer()
+	  stdsort.Ints(data)
+	  b.StopTimer()
 	}
 }
