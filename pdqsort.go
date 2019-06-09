@@ -32,7 +32,7 @@ func partialInsertionSort(data Interface, a, b int) bool {
 	len := b - a
 	i := 1
 	for k := 0; k < MAX_STEPS; k += 1 {
-		for i < len && !data.Less(i, i-1) {
+		for i < len && !data.Less(a+i, a+i-1) {
 			i += 1
 		}
 
@@ -44,10 +44,10 @@ func partialInsertionSort(data Interface, a, b int) bool {
 			return false
 		}
 
-		data.Swap(i-1, i)
+		data.Swap(a+i-1, a+i)
 
-		data.ShiftTail(a, i)
-		data.ShiftHead(i, b)
+		data.ShiftTail(a, a+i)
+		data.ShiftHead(a+i, b)
 	}
 
 	return false
@@ -126,14 +126,6 @@ func partitionInBlock(data Interface, a, b, pivot int) int {
 				block_l = rem / 2
 				block_r = rem - block_l
 			}
-
-			if block_l > BLOCK || block_r > BLOCK {
-				panic("block_l > BLOCK or block_r > BLOCK")
-			}
-
-			if (r-l) != (block_l + block_r) {
-				panic("r-l != block_l + block_r")
-			}
 		}
 
 		if start_l == end_l {
@@ -188,10 +180,6 @@ func partitionInBlock(data Interface, a, b, pivot int) int {
 	}
 
 	if start_l < end_l {
-		if (r-l) != block_l {
-			panic("r-l not equal to block_l")
-		}
-
 		for start_l < end_l {
 			end_l -= 1
 			data.Swap(offsets_l[end_l], r-1)
@@ -199,10 +187,6 @@ func partitionInBlock(data Interface, a, b, pivot int) int {
 		}
 		return (r-a)
 	} else if start_r < end_r {
-		if (r-l) != block_r {
-			panic("r-l not equal to block_r")
-		}
-		
 		for start_r < end_r {
 			end_r -= 1
 			data.Swap(l, offsets_r[end_r])
@@ -365,14 +349,10 @@ func min(a, b int) int {
 }
 
 func recurse(data Interface, a, b, pred, limit int) {
-	if pred > a {
-		panic("pred >= a")
-	}
-
 	const MAX_INSERTION = 20
 
 	wasBalanced := true
-	// wasPartitioned := true
+	wasPartitioned := true
 
 	for {
 		len := b - a
@@ -391,12 +371,12 @@ func recurse(data Interface, a, b, pred, limit int) {
 			limit -= 1
 		}
 
-		pivot, _ := choosePivot(data, a, b)
-		// if wasBalanced && wasPartitioned && likelySorted {
-		// 	if partialInsertionSort(data, a, b) {
-		// 		return
-		// 	}
-		// }
+		pivot, likelySorted := choosePivot(data, a, b)
+		if wasBalanced && wasPartitioned && likelySorted {
+			if partialInsertionSort(data, a, b) {
+				return
+			}
+		}
 
 		if pred > 0 {
 			if !data.Less(pred, pivot) {
@@ -406,9 +386,9 @@ func recurse(data Interface, a, b, pred, limit int) {
 			}
 		}
 
-		mid, _ := partition(data, a, b, pivot)
+		mid, wasP := partition(data, a, b, pivot)
 		wasBalanced = min(mid-a, len-(mid-a)) >= (len / 8)
-		// wasPartitioned = wasP
+		wasPartitioned = wasP
 
 		left_len := mid - a
 		right_len := len - (mid - a) - 1
