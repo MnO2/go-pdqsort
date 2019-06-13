@@ -404,7 +404,7 @@ func quickSort(data Interface, a, b int) {
 		return
 	}
 
-	limit := strconv.IntSize*8 - bits.LeadingZeros(uint(n))
+	limit := strconv.IntSize - bits.LeadingZeros(uint(n))
 	pred := -1
 	recurse(data, a, b, pred, limit)
 }
