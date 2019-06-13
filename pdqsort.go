@@ -34,8 +34,8 @@ const (
 	MAX_INSERTION              = 20
 )
 
-var offsets_l [BLOCK]int
-var offsets_r [BLOCK]int
+var offsetsL [BLOCK]int
+var offsetsR [BLOCK]int
 
 func partialInsertionSort(data Interface, a, b int) bool {
 
@@ -106,78 +106,78 @@ func heapSort(data Interface, a, b int) {
 
 func partitionInBlock(data Interface, a, b, pivot int) int {
 	l := a
-	block_l := BLOCK
-	start_l := 0
-	end_l := 0
+	blockL := BLOCK
+	startL := 0
+	endL := 0
 
 	r := b
-	block_r := BLOCK
-	start_r := 0
-	end_r := 0
+	blockR := BLOCK
+	startR := 0
+	endR := 0
 
 	for {
 		isDone := (r - l) <= 2*BLOCK
 
 		if isDone {
 			rem := r - l
-			if start_l < end_l || start_r < end_r {
+			if startL < endL || startR < endR {
 				rem -= BLOCK
 			}
 
-			if start_l < end_l {
-				block_r = rem
-			} else if start_r < end_r {
-				block_l = rem
+			if startL < endL {
+				blockR = rem
+			} else if startR < endR {
+				blockL = rem
 			} else {
-				block_l = rem / 2
-				block_r = rem - block_l
+				blockL = rem / 2
+				blockR = rem - blockL
 			}
 		}
 
-		if start_l == end_l {
-			start_l = 0
-			end_l = 0
+		if startL == endL {
+			startL = 0
+			endL = 0
 			elem := l
 
-			for i := 0; i < block_l; i += 1 {
-				offsets_l[end_l] = l + i
+			for i := 0; i < blockL; i += 1 {
+				offsetsL[endL] = l + i
 
 				if !data.Less(elem, pivot) {
-					end_l += 1
+					endL += 1
 				}
 
 				elem += 1
 			}
 		}
 
-		if start_r == end_r {
-			start_r = 0
-			end_r = 0
+		if startR == endR {
+			startR = 0
+			endR = 0
 			elem := r
 
-			for i := 0; i < block_r; i += 1 {
+			for i := 0; i < blockR; i += 1 {
 				elem -= 1
-				offsets_r[end_r] = r - i - 1
+				offsetsR[endR] = r - i - 1
 
 				if data.Less(elem, pivot) {
-					end_r += 1
+					endR += 1
 				}
 			}
 		}
 
-		count := min(end_l-start_l, end_r-start_r)
+		count := min(endL-startL, endR-startR)
 		if count > 0 {
-			data.CyclicSwaps(offsets_l[start_l:(start_l+count)], offsets_r[start_r:(start_r+count)])
-			start_l += count
-			start_r += count
+			data.CyclicSwaps(offsetsL[startL:(startL+count)], offsetsR[startR:(startR+count)])
+			startL += count
+			startR += count
 		}
 
-		if start_l == end_l {
-			l += block_l
+		if startL == endL {
+			l += blockL
 		}
 
-		if start_r == end_r {
-			r -= block_r
+		if startR == endR {
+			r -= blockR
 		}
 
 		if isDone {
@@ -185,17 +185,17 @@ func partitionInBlock(data Interface, a, b, pivot int) int {
 		}
 	}
 
-	if start_l < end_l {
-		for start_l < end_l {
-			end_l -= 1
-			data.Swap(offsets_l[end_l], r-1)
+	if startL < endL {
+		for startL < endL {
+			endL -= 1
+			data.Swap(offsetsL[endL], r-1)
 			r -= 1
 		}
 		return (r - a)
-	} else if start_r < end_r {
-		for start_r < end_r {
-			end_r -= 1
-			data.Swap(l, offsets_r[end_r])
+	} else if startR < endR {
+		for startR < endR {
+			endR -= 1
+			data.Swap(l, offsetsR[endR])
 			l += 1
 		}
 		return (l - a)
