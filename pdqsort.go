@@ -205,23 +205,22 @@ func partitionInBlock(data Interface, a, b, pivot int) int {
 }
 
 func partition(data Interface, a, b, pivot int) (int, bool) {
-	mid, wasPartitioned := func() (int, bool) {
-		data.Swap(a, pivot)
-		pivot = a
+	data.Swap(a, pivot)
+	pivot = a
 
-		l := a + 1
-		r := b
-		for l < r && data.Less(l, pivot) {
-			l += 1
-		}
+	l := a + 1
+	r := b
+	for l < r && data.Less(l, pivot) {
+		l += 1
+	}
 
-		for l < r && !data.Less(r-1, pivot) {
-			r -= 1
-		}
+	for l < r && !data.Less(r-1, pivot) {
+		r -= 1
+	}
 
-		numOfSmallerThanPivotElems := partitionInBlock(data, l, r, pivot)
-		return (l - 1 + numOfSmallerThanPivotElems), (l >= r)
-	}()
+	numOfSmallerThanPivotElems := partitionInBlock(data, l, r, pivot)
+	mid := (l - 1 + numOfSmallerThanPivotElems)
+	wasPartitioned := (l >= r)
 
 	data.Swap(a, mid)
 	return mid, wasPartitioned
