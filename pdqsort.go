@@ -293,6 +293,29 @@ func reverseRange(data Interface, a, b int) {
 	}
 }
 
+func sort2(data Interface, a, b, swaps *int) {
+	if data.Less(*b, *a) {
+		t := *b
+		*b = *a
+		*a = t
+
+		*swaps += 1
+	}
+}
+
+func sort3(data Interface, a, b, c, swaps *int) {
+	sort2(data, a, b, swaps)
+	sort2(data, b, c, swaps)
+	sort2(data, a, b, swaps)
+}
+
+func sortAdajacent(data Interface, a, swaps *int) {
+	t := *a
+	t_minus_one := t - 1
+	t_plus_one := t + 1
+	sort3(data, &t_minus_one, a, &t_plus_one, swaps)
+}
+
 func choosePivot(data Interface, x, y int) (pivot int, likelySorted bool) {
 	len := y - x
 
@@ -303,36 +326,13 @@ func choosePivot(data Interface, x, y int) (pivot int, likelySorted bool) {
 	swaps := 0
 
 	if len >= 8 {
-		sort2 := func(a, b *int) {
-			if data.Less(*b, *a) {
-				t := *b
-				*b = *a
-				*a = t
-
-				swaps += 1
-			}
-		}
-
-		sort3 := func(a, b, c *int) {
-			sort2(a, b)
-			sort2(b, c)
-			sort2(a, b)
-		}
-
 		if len >= SHORTEST_MEDIAN_OF_MEDIANS {
-			sortAdajacent := func(a *int) {
-				t := *a
-				t_minus_one := t - 1
-				t_plus_one := t + 1
-				sort3(&t_minus_one, a, &t_plus_one)
-			}
-
-			sortAdajacent(&a)
-			sortAdajacent(&b)
-			sortAdajacent(&c)
+			sortAdajacent(data, &a, &swaps)
+			sortAdajacent(data, &b, &swaps)
+			sortAdajacent(data, &c, &swaps)
 		}
 
-		sort3(&a, &b, &c)
+		sort3(data, &a, &b, &c, &swaps)
 	}
 
 	if swaps < MAX_SWAPS {
