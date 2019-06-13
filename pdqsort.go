@@ -257,7 +257,10 @@ func partitionEqual(data Interface, a, b, pivot int) int {
 func breakPatterns(data Interface, a, b int) {
 	len := b - a
 	if len >= 8 {
-		modulus := nextPowerOfTwo(uint(len))
+		var shift uint = uint(strconv.IntSize - bits.LeadingZeros(uint(len)))
+		var nextPowerOfTwo uint = 1 << shift
+
+		modulus := nextPowerOfTwo
 		pos := a + (len / 4 * 2)
 
 		for i := 0; i < 3; i += 1 {
@@ -272,15 +275,6 @@ func breakPatterns(data Interface, a, b int) {
 			data.Swap(pos-1+i, other)
 		}
 	}
-}
-
-func nextPowerOfTwo(n uint) uint {
-	var p uint = 1
-	for p < n {
-		p *= 2
-	}
-
-	return p
 }
 
 func reverseRange(data Interface, a, b int) {
