@@ -1,8 +1,8 @@
 package pdqsort
 
 import (
-	"math/rand"
 	"math/bits"
+	"math/rand"
 	"strconv"
 )
 
@@ -25,9 +25,19 @@ type Interface interface {
 	CyclicSwaps(is, js []int)
 }
 
+const (
+	SHORTEST_MEDIAN_OF_MEDIANS = 50
+	MAX_SWAPS                  = 4 * 3
+	BLOCK                      = 128
+	MAX_STEPS                  = 5
+	SHORTEST_SHIFTING          = 50
+	MAX_INSERTION              = 20
+)
+
+var offsets_l [BLOCK]int
+var offsets_r [BLOCK]int
+
 func partialInsertionSort(data Interface, a, b int) bool {
-	const MAX_STEPS = 5
-	const SHORTEST_SHIFTING = 50
 
 	len := b - a
 	i := 1
@@ -95,22 +105,18 @@ func heapSort(data Interface, a, b int) {
 }
 
 func partitionInBlock(data Interface, a, b, pivot int) int {
-	const BLOCK = 128
-
 	l := a
 	block_l := BLOCK
 	start_l := 0
 	end_l := 0
-	var offsets_l [BLOCK]int
 
 	r := b
 	block_r := BLOCK
 	start_r := 0
 	end_r := 0
-	var offsets_r [BLOCK]int
 
 	for {
-		isDone := (r - l) <= 2 * BLOCK
+		isDone := (r - l) <= 2*BLOCK
 
 		if isDone {
 			rem := r - l
@@ -185,16 +191,16 @@ func partitionInBlock(data Interface, a, b, pivot int) int {
 			data.Swap(offsets_l[end_l], r-1)
 			r -= 1
 		}
-		return (r-a)
+		return (r - a)
 	} else if start_r < end_r {
 		for start_r < end_r {
 			end_r -= 1
 			data.Swap(l, offsets_r[end_r])
 			l += 1
 		}
-		return (l-a)
+		return (l - a)
 	} else {
-		return (l-a)
+		return (l - a)
 	}
 }
 
@@ -203,7 +209,7 @@ func partition(data Interface, a, b, pivot int) (int, bool) {
 		data.Swap(a, pivot)
 		pivot = a
 
-		l := a+1
+		l := a + 1
 		r := b
 		for l < r && data.Less(l, pivot) {
 			l += 1
@@ -225,7 +231,7 @@ func partitionEqual(data Interface, a, b, pivot int) int {
 	data.Swap(a, pivot)
 	pivot = a
 
-	l := a+1
+	l := a + 1
 	r := b
 	for {
 		for l < r && !data.Less(pivot, l) {
@@ -256,14 +262,14 @@ func breakPatterns(data Interface, a, b int) {
 
 		for i := 0; i < 3; i += 1 {
 			var gen uint = uint(rand.Int())
-			
-			other := int(gen & (modulus-1))
+
+			other := int(gen & (modulus - 1))
 			if other >= len {
 				other -= len
 			}
 			other += a
 
-			data.Swap(pos - 1 + i, other)
+			data.Swap(pos-1+i, other)
 		}
 	}
 }
@@ -288,9 +294,6 @@ func reverseRange(data Interface, a, b int) {
 }
 
 func choosePivot(data Interface, x, y int) (pivot int, likelySorted bool) {
-	const SHORTEST_MEDIAN_OF_MEDIANS = 50
-	const MAX_SWAPS = 4 * 3
-
 	len := y - x
 
 	a := len / 4 * 1
@@ -319,8 +322,8 @@ func choosePivot(data Interface, x, y int) (pivot int, likelySorted bool) {
 		if len >= SHORTEST_MEDIAN_OF_MEDIANS {
 			sortAdajacent := func(a *int) {
 				t := *a
-				t_minus_one := t-1
-				t_plus_one := t+1
+				t_minus_one := t - 1
+				t_plus_one := t + 1
 				sort3(&t_minus_one, a, &t_plus_one)
 			}
 
@@ -333,10 +336,10 @@ func choosePivot(data Interface, x, y int) (pivot int, likelySorted bool) {
 	}
 
 	if swaps < MAX_SWAPS {
-		return x+b, (swaps == 0)
+		return x + b, (swaps == 0)
 	} else {
 		reverseRange(data, a, b)
-		return x+(len - 1 - b), true
+		return x + (len - 1 - b), true
 	}
 }
 
@@ -349,8 +352,6 @@ func min(a, b int) int {
 }
 
 func recurse(data Interface, a, b, pred, limit int) {
-	const MAX_INSERTION = 20
-
 	wasBalanced := true
 	wasPartitioned := true
 
@@ -394,7 +395,7 @@ func recurse(data Interface, a, b, pred, limit int) {
 		right_len := len - (mid - a) - 1
 		if left_len < right_len {
 			recurse(data, a, mid, pred, limit)
-			a = mid+1
+			a = mid + 1
 			pred = mid
 		} else {
 			recurse(data, mid+1, b, mid, limit)
@@ -409,7 +410,7 @@ func quickSort(data Interface, a, b int) {
 		return
 	}
 
-	limit := strconv.IntSize * 8 - bits.LeadingZeros(uint(n))
+	limit := strconv.IntSize*8 - bits.LeadingZeros(uint(n))
 	pred := -1
 	recurse(data, a, b, pred, limit)
 }
@@ -434,7 +435,7 @@ func (p IntSlice) ShiftTail(a, b int) {
 		tmp := p[b-1]
 		p[b-1] = p[b-2]
 
-		i := b-3
+		i := b - 3
 		for i >= 0 {
 			if !(tmp < p[i]) {
 				break
@@ -454,7 +455,7 @@ func (p IntSlice) ShiftHead(a, b int) {
 		tmp := p[a]
 		p[a] = p[a+1]
 
-		i := a+2
+		i := a + 2
 		for i < len {
 			if !(p[i] < tmp) {
 				break
