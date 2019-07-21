@@ -1,5 +1,7 @@
 # go-pdqsort
 
+[![Build Status](https://travis-ci.com/MnO2/go-pdqsort.svg?branch=master)](https://travis-ci.com/MnO2/go-pdqsort)
+
 Pattern-defeating sort is a new variants of hybrid sort discovered in 2016, the
 first proof of concept was in [C++](https://github.com/orlp/pdqsort) and later
 ported to [rust](https://github.com/stjepang/pdqsort). It is now part of rust
